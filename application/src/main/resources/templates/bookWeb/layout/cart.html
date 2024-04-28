@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>购物车页面</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+</head>
+<body>
+<section th:fragment="content">
+    <h2>购物车列表</h2>
+    <table id="cartTable" lay-filter="cartTable"></table>
+    <div id="totalPrice">总价:</div>
+    <button id="payButton">支付</button>
+</section>
+<script src="/jq/jquery-3.7.1.js"></script>
+<script src="/layui/layui.js"></script>
+<script th:inline="none">
+    layui.use('table', function () {
+        var table = layui.table;
+
+        $.ajax({
+            url: '/cart',
+            type: 'GET',
+            success: function (response) {
+                var data = $.map(response, function (item, index) {
+                    return {
+                        zzTitle: item.book.zzTitle,
+                        zzUrl: item.book.zzUrl,
+                        quantity: item.quantity,
+                        zzPrice: item.totalPrice
+                    };
+                });
+
+                var totalPrice = data.reduce(function (sum, item) {
+                    return sum + parseFloat(item.zzPrice);
+                }, 0);
+
+                document.getElementById('totalPrice').innerText = '总价: ' + totalPrice.toFixed(2);
+
+                table.render({
+                    elem: '#cartTable',
+                    data: data,
+                    cols: [[
+                        {field: 'zzTitle', title: '书名'},
+                        {
+                            field: 'zzUrl', title: '图像', width: 60, templet: function (d) {
+                                return `<div><img src="/${d.zzUrl}" height="26" alt="Book Image" /></div>`;
+                            }
+                        },
+                        {field: 'quantity', title: '数量'},
+                        {field: 'zzPrice', title: '总价'}
+                    ]]
+                });
+            },
+            error: function () {
+                alert('获取购物车信息出错');
+            }
+        });
+
+        document.getElementById('payButton').addEventListener('click', function () {
+            $.ajax({
+                url: '/cart/pay',
+                type: 'POST',
+                success: function (response) {
+                    alert(response);
+                },
+                error: function () {
+                    alert('支付失败');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zz.system.mapper.ZzResourceMapper">
+    <resultMap id="BaseResultMap" type="com.zz.system.pojo.ZzResource">
+        <!--@mbg.generated-->
+        <!--@Table `Zz`.`Zz_Resource`-->
+        <id column="zz_resource_id" jdbcType="BIGINT" property="zzResourceId"/>
+        <result column="zz_resource_name" jdbcType="VARCHAR" property="zzResourceName"/>
+        <result column="zz_parent_id" jdbcType="BIGINT" property="zzParentId"/>
+        <result column="zz_link" jdbcType="VARCHAR" property="zzLink"/>
+        <result column="zz_order" jdbcType="INTEGER" property="zzOrder"/>
+        <result column="zz_resource_type" jdbcType="TINYINT" property="zzResourceType"/>
+        <result column="zz_create_time" jdbcType="TIMESTAMP" property="zzCreateTime"/>
+        <result column="zz_modified_time" jdbcType="TIMESTAMP" property="zzModifiedTime"/>
+        <result column="zz_create_account_id" jdbcType="BIGINT" property="zzCreateAccountId"/>
+        <result column="zz_modified_account_id" jdbcType="BIGINT" property="zzModifiedAccountId"/>
+        <result column="zz_deleted" jdbcType="TINYINT" property="zzDeleted"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        `zz_resource_id`, `zz_resource_name`, `zz_parent_id`, `zz_link`, `zz_order`, `zz_resource_type`,
+        `zz_create_time`, `zz_modified_time`, `zz_create_account_id`, `zz_modified_account_id`,
+        `zz_deleted`
+    </sql>
+</mapper>

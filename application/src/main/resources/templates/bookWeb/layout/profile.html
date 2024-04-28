@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>个人页面</title>
+    <script src="/jq/jquery-3.7.1.js"></script>
+</head>
+<body>
+<section th:fragment="content">
+    <h2>个人列表</h2>
+    <form id="profileForm">
+        <input id="zzCustomerId" name="zzCustomerId" type="hidden">
+        <p>真实姓名: <input id="zzRealName" name="zzRealName"></p>
+        <p>性别:
+            <select id="zzSex" name="zzSex">
+                <option value="男">男</option>
+                <option value="女">女</option>
+            </select>
+        </p>
+        <p>年龄: <input id="zzAge" name="zzAge"></p>
+        <p>邮箱: <input id="zzEmail" name="zzEmail" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"></p>
+        <p>电话号码: <input id="zzPhone" name="zzPhone"></p>
+        <p>地址: <input id="zzAddress" name="zzAddress"></p>
+        <p>账户余额: <input id="zzBalance" name="zzBalance" readonly></p>
+        <button type="submit">修改</button>
+    </form>
+</section>
+<script th:inline="none">
+    $(document).ready(function () {
+        // 获取用户的信息并填充到表单中
+        $.ajax({
+            url: '/customers/current',
+            type: 'GET',
+            success: function (response) {
+                if (response.code === 0) {
+                    var data = response.data;
+                    $('#zzCustomerId').val(data.zzCustomerId);
+                    $('#zzRealName').val(data.zzRealName);
+                    $('#zzSex').val(data.zzSex);
+                    $('#zzAge').val(data.zzAge);
+                    $('#zzEmail').val(data.zzEmail);
+                    $('#zzPhone').val(data.zzPhone);
+                    $('#zzAddress').val(data.zzAddress);
+                    $('#zzBalance').val(data.zzBalance);
+                } else {
+                    console.log(JSON.stringify(response));
+                }
+            },
+            error: function () {
+                alert('Error fetching data');
+            }
+        });
+
+        // 处理表单的提交事件
+        $('#profileForm').submit(function (event) {
+            event.preventDefault();
+            // Get form data and remove balance field
+            var formDataArray = $(this).serializeArray();
+            formDataArray = formDataArray.filter(function (item) {
+                return item.name !== 'zzBalance';
+            });
+            var formData = {};
+            $.each(formDataArray, function (i, field) {
+                formData[field.name] = field.value;
+            });
+            // Submit form
+            $.ajax({
+                url: '/customers/' + $('#zzCustomerId').val(),
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.code === 0) {
+                        alert('修改成功');
+                    } else {
+                        console.log(JSON.stringify(response));
+                        alert('修改失败');
+                    }
+                },
+                error: function () {
+                    alert('Error updating data');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

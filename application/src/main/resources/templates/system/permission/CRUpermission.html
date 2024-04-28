@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>权限管理</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <script src="/layui/layui.js"></script>
+    <script src="/jq/jquery-3.7.1.js"></script>
+</head>
+<body>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md6 layui-col-md-offset3">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend th:text="${action == 'add' ? '添加权限' : (action == 'edit' ? '编辑权限' : '查看权限')}"></legend>
+            </fieldset>
+
+            <form class="layui-form" id="permissionForm"
+                  th:attr="action=@{${action == 'edit' ? '/permission/' + permission.zzPermissionId : '/permission/cru'}}"
+                  th:object="${permission}">
+                <div class="layui-form-item" style="display: none">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzPermissionId"
+                               placeholder="请输入ID"
+                               required th:disabled="${action == 'view'}" th:field="*{zzPermissionId}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">权限名称</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzPermissionName"
+                               placeholder="请输入权限名称" required th:disabled="${action == 'view'}"
+                               th:field="*{zzPermissionName}" type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">权限标识码</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzPermissionCode"
+                               placeholder="请输入权限标识码" required th:disabled="${action == 'view'}"
+                               th:field="*{zzPermissionCode}" type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item" th:if="${action != 'view'}">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" id="submitForm" type="submit">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 权限页面 -->
+<script src="/jq/common.js"></script>
+<script th:inline="javascript">
+    layui.use(['form', 'layer'], function () {
+        var form = layui.form;
+        var thAction = /*[[${action}]]*/ '';
+        var permissionId = /*[[${permission.zzPermissionId}]]*/ '1';
+        form.render();
+
+        $('#submitForm').click(function (event) {
+            event.preventDefault(); // 阻止默认的表单跳转事件
+            common.submitForm(thAction, 'permissionForm', permissionId, '/permissions', function () {
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+                parent.table.reload('test');
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

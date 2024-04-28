@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zz.system.mapper.ZzAccountRoleMapper">
+    <resultMap id="BaseResultMap" type="com.zz.system.pojo.ZzAccountRole">
+        <!--@mbg.generated-->
+        <!--@Table `Zz`.`Zz_Account_Role`-->
+        <id column="zz_account_id" jdbcType="BIGINT" property="zzAccountId"/>
+        <id column="zz_role_id" jdbcType="BIGINT" property="zzRoleId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        `zz_account_id`, `zz_role_id`
+    </sql>
+</mapper>

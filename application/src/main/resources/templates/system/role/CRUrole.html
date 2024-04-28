@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <script src="/layui/layui.js"></script>
+    <script src="/jq/jquery-3.7.1.js"></script>
+</head>
+<body>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md6 layui-col-md-offset3">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend th:text="${action == 'add' ? '添加角色' : (action == 'edit' ? '编辑角色' : '查看角色')}"></legend>
+            </fieldset>
+
+            <form class="layui-form" id="roleForm"
+                  th:attr="action=@{${action == 'edit' ? '/role/' + role.zzRoleId : '/role/cru'}}" th:object="${role}">
+                <div class="layui-form-item" style="display: none">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzRoleId"
+                               placeholder="请输入ID"
+                               required th:disabled="${action == 'view'}" th:field="*{zzRoleId}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">角色名称</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzRoleName"
+                               placeholder="请输入角色名称"
+                               required th:disabled="${action == 'view'}" th:field="*{zzRoleName}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">角色标识</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzRoleCode"
+                               placeholder="请输入角色标识"
+                               required th:disabled="${action == 'view'}" th:field="*{zzRoleCode}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">权限</label>
+                    <div class="layui-input-block">
+                        <th:block th:each="permission : ${role.zzPermissions}">
+                            <input name="zzPermissions[]" th:checked="${permission.zzIsOwned}"
+                                   th:text="${permission.zzPermissionName}"
+                                   th:value="${permission.zzPermissionId}" type="checkbox">
+                            <label th:text="${permission.zzPermissionName}"></label>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">资源</label>
+                    <div class="layui-input-block">
+                        <th:block th:each="resource : ${role.zzResources}">
+                            <input name="zzResources[]" th:checked="${resource.zzIsOwned}"
+                                   th:text="${resource.zzResourceName}"
+                                   th:value="${resource.zzResourceId}" type="checkbox">
+                            <label th:text="${resource.zzResourceName}"></label>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="layui-form-item" th:if="${action != 'view'}">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" id="saveButton" type="submit">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 角色页面 -->
+
+<script th:inline="javascript">
+    var common = {
+        submitForm: function (action, FieldName, FieldId, baseUrl, successCallback) {
+            var thAction = action;
+            var id = FieldId; // 获取ID字段的值
+            var url = thAction === 'edit' ? baseUrl + '/' + id : (thAction === 'add' ? baseUrl : '');
+            var method = thAction === 'edit' ? 'PUT' : 'POST';
+            var formData = {};
+            $('#' + FieldName).serializeArray().forEach(function (item) {
+                if (item.name === 'zzPermissions[]') {
+                    var name = 'zzPermissions'; // 标准化数组名称
+                    if (!formData[name]) {
+                        formData[name] = [];
+                    }
+                    formData[name].push({zzPermissionId: item.value});
+                } else if (item.name === 'zzResources[]') {
+                    var name = 'zzResources'; // 标准化数组名称
+                    if (!formData[name]) {
+                        formData[name] = [];
+                    }
+                    formData[name].push({zzResourceId: item.value});
+                } else {
+                    formData[item.name] = item.value;
+                }
+            });
+
+
+            $.ajax({
+                type: method,
+                url: url,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.code === 0) {
+                        layer.msg(res.message, {
+                            time: 1000,
+                            end: function () {
+                                successCallback();
+                            }
+                        });
+                    } else {
+                        layer.msg(res.message); // 处理错误消息
+                    }
+                },
+                error: function (xhr, status, error) {
+                    var errorMsg = xhr.responseJSON ? xhr.responseJSON.message : '请求失败';
+                    layer.msg(errorMsg);
+                }
+            });
+        }
+    };
+
+    $(document).ready(function () {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        $('#saveButton').click(function (event) {
+            event.preventDefault();
+            var thAction = /*[[${action}]]*/ '';
+            var roleId = /*[[${role.zzRoleId}]]*/ '1';
+            common.submitForm(thAction, 'roleForm', roleId, '/roles', function () {
+                console.log('Form submission successful');
+                var index = parent.layer.getFrameIndex(window.name); // 关闭当前iframe窗口
+                parent.layer.close(index);
+                parent.table.reload('test'); // 重新加载父页面的表格
+            });
+        });
+    });
+</script>
+</body>
+</html>

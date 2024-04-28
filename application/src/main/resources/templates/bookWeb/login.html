@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>登录/注册 - 图书管理系统</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        form {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            width: 300px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none; /* Default to none to hide forms initially */
+        }
+
+        input[type="text"], input[type="password"], input[type="email"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            width: calc(100% - 22px); /* Adjust for padding and border */
+        }
+
+        button {
+            padding: 10px;
+            background-color: #f2f2f2;
+            color: #000;
+            border: 1px solid #ddd;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e2e2e2;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #toggle-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #toggle-buttons button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="toggle-buttons">
+    <button onclick="showLoginForm()">登录</button>
+    <button onclick="showRegisterForm()">注册</button>
+    <button onclick="window.location.href='/system/login'">后台登录</button>
+</div>
+<div class="container">
+    <form action="/auth/customerLogin" id="login-form" method="post">
+        <div class="form-group">
+            <label for="email">邮箱:</label>
+            <input id="email" name="email" placeholder="输入邮箱" required type="text">
+        </div>
+        <div class="form-group">
+            <label for="password">密码:</label>
+            <input id="password" name="password" placeholder="输入密码" required type="password">
+        </div>
+        <div class="error-message"></div>
+        <div class="form-group">
+            <button type="submit">登录</button>
+        </div>
+
+    </form>
+    <form action="/auth/register" id="register-form" method="post">
+        <div class="form-group">
+            <label for="reg_email">邮箱:</label>
+            <input id="reg_email" name="email" placeholder="输入邮箱" required type="email">
+        </div>
+        <div class="form-group">
+            <label for="reg_password">密码:</label>
+            <input id="reg_password" name="password" placeholder="输入密码" required type="password">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">确认密码:</label>
+            <input id="confirm_password" name="confirm_password" placeholder="确认密码" required type="password">
+        </div>
+        <div class="error-message"></div>
+        <div class="form-group">
+            <button type="submit">注册</button>
+        </div>
+    </form>
+</div>
+<script>
+    function showLoginForm() {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('register-form').style.display = 'none';
+    }
+
+    function showRegisterForm() {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = 'block';
+    }
+</script>
+</body>
+</html>

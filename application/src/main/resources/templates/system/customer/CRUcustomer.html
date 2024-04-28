@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>客户管理</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <script src="/layui/layui.js"></script>
+    <script src="/jq/jquery-3.7.1.js"></script>
+</head>
+<body>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md6 layui-col-md-offset3">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend th:text="${action == 'add' ? '添加客户' : (action == 'edit' ? '编辑客户' : '查看客户')}"></legend>
+            </fieldset>
+
+            <form class="layui-form" id="customerForm"
+                  th:attr="action=@{${action == 'edit' ? '/customer/' + customer.zzCustomerId : '/customer/cru'}}"
+                  th:object="${customer}">
+                <div class="layui-form-item" style="display: none">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzCustomerId"
+                               placeholder="请输入ID"
+                               required th:disabled="${action == 'view'}" th:field="*{zzCustomerId}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzRealName"
+                               placeholder="请输入姓名"
+                               required th:disabled="${action == 'view'}" th:field="*{zzRealName}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">电话</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzPhone"
+                               placeholder="请输入电话"
+                               required th:disabled="${action == 'view'}" th:field="*{zzPhone}"
+                               type="text">
+                    </div>
+                </div>
+
+                <div class="layui-form-item" th:if="${action != 'view'}">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" id="saveButton" type="submit">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- 客户页面 -->
+
+<script th:inline="javascript">
+    var common = {
+        submitForm: function (action, FieldName, FieldId, baseUrl, successCallback) {
+            var thAction = action;
+            var id = FieldId; // 获取ID字段的值
+            var url = thAction === 'edit' ? baseUrl + '/' + id : (thAction === 'add' ? baseUrl : '');
+            var method = thAction === 'edit' ? 'PUT' : 'POST';
+            var formData = {};
+            $('#' + FieldName).serializeArray().forEach(function (item) {
+                formData[item.name] = item.value;
+            });
+
+            $.ajax({
+                type: method,
+                url: url,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.code === 0) {
+                        layer.msg(res.message, {
+                            time: 1000,
+                            end: function () {
+                                successCallback();
+                            }
+                        });
+                    } else {
+                        layer.msg(res.message); // 处理错误消息
+                    }
+                },
+                error: function (xhr, status, error) {
+                    var errorMsg = xhr.responseJSON ? xhr.responseJSON.message : '请求失败';
+                    layer.msg(errorMsg);
+                }
+            });
+        }
+    };
+
+    $(document).ready(function () {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        $('#saveButton').click(function (event) {
+            event.preventDefault();
+            var thAction = /*[[${action}]]*/ '';
+            var customerId = /*[[${customer.zzCustomerId}]]*/ '1';
+            common.submitForm(thAction, 'customerForm', customerId, '/customers', function () {
+                console.log('Form submission successful');
+                var index = parent.layer.getFrameIndex(window.name); // 关闭当前iframe窗口
+                parent.layer.close(index);
+                parent.table.reload('test'); // 重新加载父页面的表格
+            });
+        });
+    });
+</script>
+</body>
+</html>

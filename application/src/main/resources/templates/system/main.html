@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Zz后台管理系统</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <script src="/layui/layui.js"></script>
+    <script src="/jq/jquery-3.7.1.js"></script>
+    <style>
+        .full-iframe {
+            width: 100%;
+            height: 80vh;
+        }
+    </style>
+
+</head>
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">Zz后台管理系统</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:">
+                    <span th:text="${stp.getSession().get('zzUsername')}"></span>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd>
+                        <form action="/auth/logout" id="logoutForm" method="post" style="display: none;"></form>
+                        <a href="javascript:" onclick="document.getElementById('logoutForm').submit();">登出</a>
+                    </dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item" th:each="menu : ${stp.getSession().get('menuList')}">
+                    <a href="javascript:" th:text="${menu.zzResourceName}"></a>
+                    <dl class="layui-nav-child" th:if="${not #lists.isEmpty(menu.zzChildren)}">
+                        <dd th:each="subMenu : ${menu.zzChildren}">
+                            <a href="javascript:"
+                               th:data-id="${subMenu.zzResourceId}"
+                               th:data-link="${subMenu.zzLink}"
+                               th:data-name="${subMenu.zzResourceName}"
+                               th:text="${subMenu.zzResourceName}">菜单项</a>
+                        </dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="layui-body">
+        <div class="layui-tab layui-tab-brief" lay-filter="demoTab">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="welcome">欢迎页</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">欢迎使用本系统</div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-footer">
+        © Zz后台管理系统
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        $(document).ajaxError(function (event, xhr, options, exc) {
+            if (xhr.status === 401) {
+                // 弹出错误信息
+                layui.layer.alert('用户未登录', {icon: 5}, function (index) {
+                    // 关闭弹出层
+                    layui.layer.close(index);
+                    // 跳转到登录页
+                    window.location.href = '/login';
+                });
+            }
+        });
+    });
+
+
+    layui.use(['element'], function () {
+        var element = layui.element;
+        var $ = layui.$;
+
+        window.closeTab = function (event, id) {
+            event.stopPropagation();
+            element.tabDelete('demoTab', id);
+        };
+
+        $(document).ready(function () {
+            element.tabDelete('demoTab', 'welcome');
+            $('.layui-nav-tree a[data-link]').on('click', function () {
+                var id = $(this).attr('data-id');
+                var name = $(this).attr('data-name');
+                var url = $(this).attr('data-link');
+                showTab(id, name, url);
+                return false;
+            });
+        });
+
+        function showTab(id, name, url) {
+            var fullUrl = url.startsWith('/') ? url : '/' + url;
+            var length = $('.layui-tab-title li[lay-id="' + id + '"]').length;
+
+            length === 0 && element.tabAdd('demoTab', {
+                title: name + '<i class="layui-icon layui-unselect layui-tab-close" onclick="closeTab(event, \'' + id + '\')">&#x1006;</i>',
+                content: '<iframe src="' + fullUrl + '" frameborder="0" scrolling="no" class="full-iframe"></iframe>',
+                id: id
+            });
+
+            element.tabChange('demoTab', id);
+        }
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>订单详情表格 - Layui</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <script src="/jq/jquery-3.7.1.js"></script>
+</head>
+<body>
+<div style="padding: 16px;">
+    <div class="layui-inline">
+        <input autocomplete="off" class="layui-input" id="searchInput" name="search" placeholder="请输入搜索关键字">
+    </div>
+    <button class="layui-btn" id="searchBtn">搜索</button>
+    <div style=" overflow-y: auto; max-height: 500px;">
+        <table class="layui-hide" id="test" lay-filter="test"></table>
+    </div>
+    <div style="margin-top: 20px; overflow-y: auto; max-height: 500px;">
+        <table class="layui-hide" id="subTable" lay-filter="subTable"></table>
+    </div>
+</div>
+<script src="/layui/layui.js"></script>
+<script src="/jq/com.js"></script>
+
+<script id="barDemo" type="text/html">
+    <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+</script>
+
+<script th:inline="none">
+    layui.use(['table'], function () {
+        var table = layui.table;
+        // 主表配置
+        table.render({
+            elem: '#test',
+            url: '/orders/list', // 确保与后端API路径匹配
+            cols: [[
+                {type: 'checkbox', fixed: 'left'},
+                {field: 'zzOrderId', title: '订单ID', width: 120, sort: true},
+                {field: 'zzCustomerId', title: '客户ID', width: 100},
+                {field: 'zzOrderTotal', title: '订单总金额', width: 100, sort: true},
+                {fixed: 'right', title: '操作', toolbar: '#barDemo', width: 180}
+            ]],
+            page: true,
+            height: 'full-500',
+            limit: 10,
+            limits: [10, 20, 30, 50],
+            toolbar: true,
+            defaultToolbar: ['filter', 'print', 'exports']
+        });
+
+        // 子表配置
+        table.on('row(test)', function (obj) {
+            var data = obj.data; // 获取主表行的数据
+            // 子表配置
+            table.render({
+                elem: '#subTable',
+                height: 'full-500',
+                data: data.zzOrderItems, // 使用主表行的 zzOrderItems 数据作为子表的数据源
+                cols: [[
+                    {
+                        field: 'zzBooks.zzTitle', title: '书籍标题', templet: function (d) {
+                            return d.zzBooks ? d.zzBooks.zzTitle : '';
+                        }
+                    },
+                    {
+                        field: 'zzBooks.zzUrl', title: '封面', width: 60, templet: function (d) {
+                            return `<div><img src="/${d.zzBooks.zzUrl}" height="26" alt="Book Image" /></div>`;
+                        }
+                    },
+                    {field: 'zzQuantity', title: '数量'},
+                    {field: 'zzPrice', title: '总价'},
+                    {
+                        field: 'zzCustomers.zzRealName', title: '顾客姓名', templet: function (d) {
+                            return d.zzCustomers ? d.zzCustomers.zzRealName : '';
+                        }
+                    },
+                    {
+                        field: 'zzCustomers.zzAddress', title: '地址', templet: function (d) {
+                            return d.zzCustomers ? d.zzCustomers.zzAddress : '';
+                        }
+                    },
+                    {
+                        field: 'zzCustomers.zzPhone', title: '电话', templet: function (d) {
+                            return d.zzCustomers ? d.zzCustomers.zzPhone : '';
+                        }
+                    }
+                ]]
+            });
+        });
+
+
+        // 工具条事件
+        table.on('tool(test)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            handleTableEvent(layEvent, data, 'orders');
+        });
+
+        $('#searchBtn').click(function () {
+            table.reload('test', {where: {search: $('#searchInput').val()}});
+        });
+    });
+
+    function handleTableEvent(event, data, resource) {
+        switch (event) {
+            case 'delete':
+                layer.confirm('确定删除吗?', function (index) {
+                    // 发起删除请求
+                    console.log('Delete resource ID:', data.zzOrderId);
+                    layer.close(index);
+                });
+                break;
+            case 'view':
+                console.log('View details for ID:', data.zzOrderId);
+                break;
+        }
+    }
+</script>
+</body>
+</html>

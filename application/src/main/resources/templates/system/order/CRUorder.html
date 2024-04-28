@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单管理</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <script src="/layui/layui.js"></script>
+    <script src="/jq/jquery-3.7.1.js"></script>
+</head>
+<body>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md6 layui-col-md-offset3">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend th:text="${action == 'add' ? '添加订单' : (action == 'edit' ? '编辑订单' : '查看订单')}"></legend>
+            </fieldset>
+
+            <form class="layui-form" id="orderForm"
+                  th:attr="action=@{${action == 'edit' ? '/order/' + order.zzOrderId : '/order/cru'}}"
+                  th:object="${order}">
+                <div class="layui-form-item" style="display: none">
+                    <label class="layui-form-label">订单ID</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzOrderId"
+                               placeholder="请输入订单ID"
+                               required th:disabled="${action == 'view'}" th:field="*{zzOrderId}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户ID</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzCustomerId"
+                               placeholder="请输入客户ID"
+                               required th:disabled="${action == 'view'}" th:field="*{zzCustomerId}"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">订单总金额</label>
+                    <div class="layui-input-block">
+                        <input autocomplete="off" class="layui-input" lay-verify="required" name="zzOrderTotal"
+                               pattern="^\d+(\.\d{1,2})?$"
+                               placeholder="请输入订单总金额" required th:disabled="${action == 'view'}"
+                               th:field="*{zzOrderTotal}" title="请输入有效的金额，最多两位小数"
+                               type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item" th:if="${action != 'view'}">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" id="saveButton" type="submit">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 订单页面 -->
+
+<script th:inline="javascript">
+    $(document).ready(function () {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        // AJAX form submission
+        $('#saveButton').click(function (event) {
+            event.preventDefault();  // Prevent default form submission
+            var thAction = /*[[${action}]]*/ '';
+            var orderId = /*[[${order.zzOrderId}]]*/ '1';  // Example ID, ensure dynamic ID is used
+            var formElement = document.getElementById('orderForm');
+            var formData = new FormData(formElement);
+            var method = thAction === 'edit' ? 'PUT' : 'POST';
+            var url = thAction === 'edit' ? '/orders/' + orderId : '/orders';
+
+            $.ajax({
+                type: method,
+                url: url,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    if (res.code === 0) {
+                        layer.msg('操作成功', {
+                            time: 1000,
+                            end: function () {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                parent.table.reload('testReload');
+                            }
+                        });
+                    } else {
+                        layer.msg(res.message);
+                    }
+                },
+                error: function (xhr) {
+                    var errorMsg = xhr.responseJSON ? xhr.responseJSON.message : '操作失败';
+                    layer.msg(errorMsg);
+                }
+            });
+        });
+    });
+</script>
+
+
+</body>
+</html>

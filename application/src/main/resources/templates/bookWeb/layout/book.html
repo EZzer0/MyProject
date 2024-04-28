@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>图书详情 - 图书管理系统</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <table class="layui-table" id="bookTable" lay-filter="bookTable"></table>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script th:inline="none">
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+
+        $.ajax({
+            url: '/books/list',
+            type: 'GET',
+            data: {
+                page: 1,
+                limit: 5
+            },
+            success: function (response) {
+                if (response.code === 0) {
+                    var data = response.data;
+                    table.render({
+                        elem: '#bookTable',
+                        height: 'full-200',
+                        cols: [[
+                            {field: 'zzTitle', title: '书名', sort: true, width: 180},
+                            {field: 'zzAuthor', title: '作者', width: 180},
+                            {field: 'zzPrice', title: '价格', sort: true, width: 120},
+                            {field: 'zzInventoryCount', title: '库存数量', width: 100},
+                            {
+                                field: 'zzUrl', title: '图像', width: 60, templet: function (d) {
+                                    return `<div><img src="/${d.zzUrl}" height="26" alt="Book Image" /></div>`;
+                                }
+                            },
+                            {title: '操作', width: 150, toolbar: '#actionBar'}
+                        ]],
+                        data: data,
+                        page: true
+                    });
+                } else {
+                    console.log(JSON.stringify(response));
+                }
+            },
+            error: function () {
+                alert('Error fetching data');
+            }
+        });
+
+        table.on('tool(bookTable)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'addToCart') {
+                $.ajax({
+                    url: '/cart',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        alert('书籍已添加到购物车');
+                    },
+                    error: function () {
+                        alert('添加书籍到购物车出错');
+                    }
+                });
+            } else if (obj.event === 'removeFromCart') {
+                $.ajax({
+                    url: '/cart',
+                    type: 'DELETE',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        alert('书籍已从购物车中移除');
+                    },
+                    error: function () {
+                        alert('从购物车中移除书籍出错');
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script id="actionBar" type="text/html">
+    <a class="layui-btn layui-btn-xs" lay-event="addToCart">+</a>
+    <a class="layui-btn layui-btn-xs" lay-event="removeFromCart">-</a>
+</script>
+
+</body>
+</html>

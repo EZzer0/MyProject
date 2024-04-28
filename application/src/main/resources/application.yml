@@ -1,0 +1,51 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource  # Specify HikariCP as the datasource type
+    url: jdbc:mysql://localhost:3306/zz?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: HikariCP
+      auto-commit: true
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 10000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      leak-detection-threshold: 5000
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,file:/D:/BPP/Code/IntelliJ%20IDEA/zzPro/picture/
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/mapperxml/*Mapper.xml
+  global-config:
+    db-config:
+      id-type: auto
+
+sa-token:
+  token-name: ZzToken
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: false
+  is-share: true
+  token-style: uuid
+  is-log: true
+
+
